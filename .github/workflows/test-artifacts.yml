@@ -12,35 +12,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - uses: actions/download-artifact@v3
-        with:
-          name: environment-state-files
-          path: artifacts/
-
-      - name: Check for downloaded artifacts
-        run: |
-          ls -a artifacts
-          cat artifacts/a.txt
-
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
 
-      - name: Make a file
+      - name: Install aws cli
         run: |
-          echo hello > artifacts/a.txt
+          python3 -m pip install --user awscli
 
-      - name: Upload state files
-        uses: actions/upload-artifact@v3
-        with:
-          name: environment-state-files
-          path: artifacts/*.txt
-          if-no-files-found: warn
+      - name: Download artifact
+        env:
+          AWS_ACCESS_KEY_ID: ${{ AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{AWS_SECRET_ACCESS_KEY }}
+        run: |
+          aws s3 cp s3://agnone/a.txt artifacts/a.txt
 
-      - name: Upload state files2
-        uses: actions/upload-artifact@v3
-        with:
-          name: environment-state-files2
-          path: artifacts/*
-          if-no-files-found: warn
+      - name: Edit the artifact file
+        run: |
+          date >> artifacts/a.txt
+
+      - name: Upload artifact
+        env:
+          AWS_ACCESS_KEY_ID: ${{ AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{AWS_SECRET_ACCESS_KEY }}
+        run: |
+          aws s3 cp artifacts/a.txt s3://agnone/a.txt
