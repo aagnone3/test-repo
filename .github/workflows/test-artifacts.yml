@@ -17,9 +17,20 @@ jobs:
         with:
           python-version: 3.8
 
+      - name: Make a file
+        run: |
+          echo hello > artifacts/a.txt
+
       - name: Upload state files
         uses: actions/upload-artifact@v3
         with:
           name: environment-state-files
-          path: files
+          path: artifacts/*.txt
+          if-no-files-found: warn
+
+      - name: Upload state files2
+        uses: actions/upload-artifact@v3
+        with:
+          name: environment-state-files2
+          path: artifacts/*
           if-no-files-found: warn
